@@ -36,7 +36,7 @@ export default function VerdictCard({
 
       <div className="card product">
         <div className="product-head">
-          {food.image ? <img src={food.image} alt="" /> : <div className="product-placeholder">🍽️</div>}
+          {food.image ? <img src={food.image} alt="" /> : <div className="product-placeholder">{food.emoji || "🍽️"}</div>}
           <div className="grow">
             <h2>{food.name}</h2>
             {food.brand && <p className="muted">{food.brand}</p>}
@@ -68,8 +68,24 @@ export default function VerdictCard({
             <input type="date" value={expiry || ""} onChange={(e) => onExpiryChange(e.target.value || null)} />
           </label>
         </div>
+        <div className="portions">
+          {portionsFor(food).map((p) => (
+            <button
+              key={p.label}
+              className={`chip toggle ${amount === p.grams ? "on" : ""}`}
+              onClick={() => setGrams(p.grams)}
+            >
+              {p.label === "100 g" ? "100 g" : `${p.label} · ${p.grams} g`}
+            </button>
+          ))}
+        </div>
         {food.hasNutrition && (
           <>
+            <p className="per100">
+              <b>Per 100 g:</b> {food.per100g.kcal} kcal · {food.per100g.protein} g protein ·{" "}
+              {food.per100g.carbs} g carbs · {food.per100g.fat} g fat
+            </p>
+            <p className="portion-title">Your portion: {amount} g</p>
             <div className="macro-grid">
               <Stat label="Calories" value={n.kcal} unit="kcal" accent />
               <Stat label="Protein" value={n.protein} unit="g" />
@@ -95,6 +111,14 @@ export default function VerdictCard({
       </div>
     </section>
   );
+}
+
+// Quick amount buttons: 100 g, the product's serving, and any common portions.
+function portionsFor(food) {
+  const list = [{ label: "100 g", grams: 100 }];
+  if (food.portions?.length) list.push(...food.portions.filter((p) => p.grams !== 100));
+  else if (food.servingGrams && food.servingGrams !== 100) list.push({ label: "1 serving", grams: food.servingGrams });
+  return list;
 }
 
 function Stat({ label, value, unit, accent }) {

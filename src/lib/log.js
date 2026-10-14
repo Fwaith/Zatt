@@ -25,6 +25,7 @@ export function makeEntry(food, grams, level) {
     barcode: food.barcode,
     name: food.name,
     image: food.image,
+    emoji: food.emoji,
     grams,
     nutriscore: food.nutriscore,
     level,

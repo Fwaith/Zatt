@@ -8,6 +8,7 @@ export default function SwapSuggestion({ food, profile, onCompare, onOpen }) {
   const [state, setState] = useState({ status: "loading", swaps: [] });
 
   useEffect(() => {
+    if (!food.categories.length) return;
     let cancelled = false;
     setState({ status: "loading", swaps: [] });
     findSwaps(food, (f) => isSafeFor(f, profile))
@@ -18,7 +19,7 @@ export default function SwapSuggestion({ food, profile, onCompare, onOpen }) {
     };
   }, [food.barcode, profile.allergens.join(), profile.diets.join()]);
 
-  if (food.nutriscore === "a") return null;
+  if (food.nutriscore === "a" || !food.categories.length) return null;
 
   return (
     <div className="card swaps">

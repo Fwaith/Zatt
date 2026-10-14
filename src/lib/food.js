@@ -118,6 +118,96 @@ export function nutritionFor(food, grams) {
   };
 }
 
+// ---------- Text search ----------
+
+/** Branded products matching a name, e.g. "coca cola". Only returns products with nutrition data. */
+export async function searchProducts(query, limit = 12) {
+  const q = query.replace(/[:"()\[\]{}]/g, " ").trim();
+  if (!q) return [];
+  let products = null;
+  try {
+    const res = await fetch(
+      `${SEARCH_PROXY}?q=${encodeURIComponent(q)}&page_size=24&sort_by=-unique_scans_n&fields=${FIELDS}`
+    );
+    if (res.ok && (res.headers.get("content-type") || "").includes("json")) {
+      products = (await res.json()).hits;
+    }
+  } catch {
+    // fall through
+  }
+  if (!Array.isArray(products)) {
+    const res = await fetch(
+      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}` +
+        `&search_simple=1&json=1&page_size=24&sort_by=unique_scans_n&fields=${FIELDS}`
+    );
+    if (!res.ok) throw new Error(`search ${res.status}`);
+    products = (await res.json()).products || [];
+  }
+  const seen = new Set();
+  return products
+    .map((p) => toFood(p))
+    .filter((f) => {
+      if (!f.hasNutrition || f.name === "Unknown product" || !f.barcode || seen.has(f.barcode)) return false;
+      seen.add(f.barcode);
+      return true;
+    })
+    .slice(0, limit);
+}
+
+// Optional: USDA FoodData Central for more generic foods.
+// Get a free key at https://fdc.nal.usda.gov/api-key-signup and put it in .env.local:
+//   VITE_USDA_API_KEY=your_key
+const USDA_KEY = import.meta.env.VITE_USDA_API_KEY;
+export const hasUsda = Boolean(USDA_KEY);
+
+const USDA_NUTRIENTS = { 208: "kcal", 957: "kcal", 958: "kcal", 203: "protein", 205: "carbs", 204: "fat", 269: "sugar", 606: "satFat", 307: "sodium" };
+
+export async function searchUsda(query, limit = 6) {
+  if (!USDA_KEY) return [];
+  const url =
+    `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_KEY}` +
+    `&query=${encodeURIComponent(query)}&dataType=Foundation,SR%20Legacy&pageSize=${limit}`;
+  const res = await fetch(url);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.foods || []).map((f) => {
+    const v = {};
+    for (const n of f.foodNutrients || []) {
+      const key = USDA_NUTRIENTS[n.nutrientNumber];
+      if (key && v[key] == null && (key !== "kcal" || n.unitName === "KCAL")) v[key] = n.value;
+    }
+    const name = f.description.charAt(0) + f.description.slice(1).toLowerCase();
+    return {
+      barcode: `usda:${f.fdcId}`,
+      name,
+      brand: "USDA",
+      image: "",
+      emoji: "🥗",
+      servingGrams: 100,
+      portions: [],
+      hasNutrition: v.kcal != null,
+      per100g: {
+        kcal: Math.round(v.kcal || 0),
+        protein: v.protein || 0,
+        carbs: v.carbs || 0,
+        fat: v.fat || 0,
+        sugar: v.sugar || 0,
+        satFat: v.satFat || 0,
+        salt: v.sodium ? +((v.sodium * 2.5) / 1000).toFixed(2) : 0,
+      },
+      nutriscore: null,
+      nova: null,
+      allergens: [],
+      traces: [],
+      analysis: [],
+      labels: [],
+      categories: [],
+      ingredientsText: "", // unknown, so allergy users get a "check the label" warning
+      source: "usda",
+    };
+  }).filter((f) => f.hasNutrition);
+}
+
 // ---------- Healthier swaps ----------
 
 async function searchCategory(category, betterGrades) {

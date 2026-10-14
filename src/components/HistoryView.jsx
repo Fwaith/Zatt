@@ -75,7 +75,7 @@ export default function HistoryView({ history, onOpen, onCompare, onClear, onSca
               <span className="history-level" title={h.level ? LEVELS[h.level].label : ""}>
                 {h.level ? LEVELS[h.level].icon : "•"}
               </span>
-              {h.food.image ? <img src={h.food.image} alt="" /> : <div className="thumb">🍽️</div>}
+              {h.food.image ? <img src={h.food.image} alt="" /> : <div className="thumb">{h.food.emoji || "🍽️"}</div>}
               <span className="grow">
                 <span className="entry-name">{h.food.name}</span>
                 <span className="muted small">

@@ -56,7 +56,7 @@ export default function CompareView({ a, b, profile, onClose }) {
               <th />
               {[a, b].map((f) => (
                 <th key={f.barcode}>
-                  {f.image ? <img src={f.image} alt="" /> : <div className="thumb">🍽️</div>}
+                  {f.image ? <img src={f.image} alt="" /> : <div className="thumb">{f.emoji || "🍽️"}</div>}
                   <span>{f.name}</span>
                 </th>
               ))}

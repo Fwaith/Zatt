@@ -20,6 +20,8 @@ and they also proxy the swap search). In the browser you can type a barcode or u
 | Feature | Where |
 |---|---|
 | Barcode scan + product lookup | Scan tab |
+| **Search by name**: branded products ("coca cola") from Open Food Facts + ~35 built-in common foods ("rice", "chicken breast") | Scan tab search box |
+| Custom amount with portion buttons (100 g, 1 breast, 1 cup…) + fixed "Per 100 g" line | Verdict screen |
 | **Verdict**: one answer with the reasons behind it | Shown after every scan |
 | Health grade (Nutri-Score A–E + NOVA processing level) | Verdict screen |
 | Allergen profile + alerts (including "may contain" traces, phone vibration) | Profile → Verdict |
@@ -62,6 +64,16 @@ Missing data gives "check the label" instead of a guess.
 6. **History**: "Use these first" shows the yogurt expiring tomorrow.
 
 Sample barcodes: Nutella `3017620422003` · Mars `5000159407236` · Coca-Cola `5449000000996` · Alpro yogurt `5411188119098`
+
+## Optional: more generic foods from USDA
+
+Create `.env.local` with a free key from https://fdc.nal.usda.gov/api-key-signup:
+
+```
+VITE_USDA_API_KEY=your_key
+```
+
+USDA results then appear under "Common foods". Edit the built-in list in `src/lib/commonFoods.js`.
 
 ## Ideas if you have time
 

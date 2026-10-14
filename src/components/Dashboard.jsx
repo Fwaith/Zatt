@@ -47,7 +47,7 @@ export default function Dashboard({ allEntries, entries, totals, profile, histor
           <ul className="entries">
             {entries.map((e) => (
               <li key={e.id}>
-                {e.image ? <img src={e.image} alt="" /> : <div className="thumb">🍽️</div>}
+                {e.image ? <img src={e.image} alt="" /> : <div className="thumb">{e.emoji || "🍽️"}</div>}
                 <div className="grow">
                   <p className="entry-name">{e.level && LEVELS[e.level].icon} {e.name}</p>
                   <p className="muted small">{e.grams} g · P {e.protein} · C {e.carbs} · F {e.fat}</p>
