@@ -1,30 +1,13 @@
-// Owner: Person B — food log + goals, stored in localStorage.
+// Owner: Person B — food log + daily/weekly stats, stored in localStorage.
 //
 // Entry shape:
-// { id, date: "YYYY-MM-DD", time, barcode, name, image, grams, kcal, protein, carbs, fat }
+// { id, date: "YYYY-MM-DD", time, barcode, name, image, grams,
+//   kcal, protein, carbs, fat, sugar, nutriscore, level }
 
-import { nutritionFor } from "./food.js";
+import { GRADE_RANK, nutritionFor } from "./food.js";
+import { read, write } from "./storage.js";
 
 const ENTRIES_KEY = "tracker.entries";
-const GOAL_KEY = "tracker.goal";
-export const DEFAULT_GOAL = 2000;
-
-function read(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function write(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Storage blocked (private mode etc.) — app still works for this session.
-  }
-}
 
 export function todayKey(d = new Date()) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -33,10 +16,8 @@ export function todayKey(d = new Date()) {
 
 export const loadEntries = () => read(ENTRIES_KEY, []);
 export const saveEntries = (entries) => write(ENTRIES_KEY, entries);
-export const loadGoal = () => read(GOAL_KEY, DEFAULT_GOAL);
-export const saveGoal = (goal) => write(GOAL_KEY, goal);
 
-export function makeEntry(food, grams) {
+export function makeEntry(food, grams, level) {
   return {
     id: crypto.randomUUID?.() ?? String(Date.now() + Math.random()),
     date: todayKey(),
@@ -45,6 +26,8 @@ export function makeEntry(food, grams) {
     name: food.name,
     image: food.image,
     grams,
+    nutriscore: food.nutriscore,
+    level,
     ...nutritionFor(food, grams),
   };
 }
@@ -60,15 +43,11 @@ export function totals(entries) {
       protein: acc.protein + e.protein,
       carbs: acc.carbs + e.carbs,
       fat: acc.fat + e.fat,
+      sugar: acc.sugar + (e.sugar || 0),
     }),
-    { kcal: 0, protein: 0, carbs: 0, fat: 0 }
+    { kcal: 0, protein: 0, carbs: 0, fat: 0, sugar: 0 }
   );
-  return {
-    kcal: Math.round(t.kcal),
-    protein: Math.round(t.protein),
-    carbs: Math.round(t.carbs),
-    fat: Math.round(t.fat),
-  };
+  return Object.fromEntries(Object.entries(t).map(([k, v]) => [k, Math.round(v)]));
 }
 
 /** Simple macro targets from a calorie goal (25% protein / 50% carbs / 25% fat). */
@@ -78,4 +57,37 @@ export function macroTargets(goal) {
     carbs: Math.round((goal * 0.5) / 4),
     fat: Math.round((goal * 0.25) / 9),
   };
+}
+
+/** Last `days` days (oldest first) with total kcal and sugar per day. */
+export function dailyTotals(entries, days = 7) {
+  const out = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = todayKey(d);
+    const t = totals(entriesFor(entries, key));
+    out.push({
+      date: key,
+      label: i === 0 ? "Today" : d.toLocaleDateString(undefined, { weekday: "short" }),
+      kcal: t.kcal,
+      sugar: t.sugar,
+    });
+  }
+  return out;
+}
+
+/** Average Nutri-Score of the logged entries, as a letter (or null). */
+export function averageGrade(entries) {
+  const ranks = entries.map((e) => GRADE_RANK[e.nutriscore]).filter(Boolean);
+  if (!ranks.length) return null;
+  const avg = Math.round(ranks.reduce((a, b) => a + b, 0) / ranks.length);
+  return Object.keys(GRADE_RANK).find((g) => GRADE_RANK[g] === avg);
+}
+
+export function entriesSince(entries, days) {
+  const d = new Date();
+  d.setDate(d.getDate() - (days - 1));
+  const from = todayKey(d);
+  return entries.filter((e) => e.date >= from);
 }

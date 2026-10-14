@@ -1,7 +1,9 @@
-# Track-er
+# Track-er: "Should I eat this?"
 
-Scan a food barcode, see its nutrition, and log it against a daily calorie goal.
-Data comes from [Open Food Facts](https://world.openfoodfacts.org). The log is saved in the browser (`localStorage`), so there's no backend.
+Scan any food barcode and get **one clear answer**: ✅ Go for it · ⚠️ In moderation · ⛔ Don't eat,
+personalised to your allergies, diet, daily goals and the product's expiry date. The app also suggests healthier swaps.
+
+Data: [Open Food Facts](https://world.openfoodfacts.org). Storage: the browser (`localStorage`), so there's no backend.
 
 ## Run
 
@@ -10,30 +12,59 @@ npm install
 npm run dev
 ```
 
-Open the printed `localhost` URL. The camera only works on **HTTPS or localhost**. To test on a phone, deploy (e.g. Vercel/Netlify) or use the "Try a sample" buttons / type a barcode.
+The camera needs **HTTPS or localhost**. To use it on a phone, deploy to Vercel or Netlify (both configs are included,
+and they also proxy the swap search). In the browser you can type a barcode or use the sample buttons.
+
+## Features
+
+| Feature | Where |
+|---|---|
+| Barcode scan + product lookup | Scan tab |
+| **Verdict**: one answer with the reasons behind it | Shown after every scan |
+| Health grade (Nutri-Score A–E + NOVA processing level) | Verdict screen |
+| Allergen profile + alerts (including "may contain" traces, phone vibration) | Profile → Verdict |
+| Dietary filters (vegan, vegetarian, halal, gluten-free, dairy-free, low sugar, keto, no palm oil) | Profile → Verdict |
+| Fits-your-day check (calories + sugar left today) | Verdict screen |
+| Sugar cubes visual | Verdict screen |
+| Healthier swaps (same category, better grade, safe for *your* profile) | Verdict screen |
+| Product comparison | Verdict → swap "Compare", or History → ⚖️ Compare |
+| Expiry date + "Use these first" | Verdict screen → History |
+| Scan history | History tab |
+| Daily + weekly trends (avg food grade, "Don't eat" items avoided, kcal chart) | Today tab |
+
+## How the verdict works (`src/lib/verdict.js`)
+
+Each check produces reasons rated `stop` / `caution` / `go` / `info`. **The worst reason decides the verdict.**
+
+1. **Expiry**: expired → ⛔ · expires within 2 days → "eat it soon"
+2. **Allergens**: contains or may contain one of your allergens → ⛔
+3. **Diet**: e.g. non-vegan for a vegan → ⛔ · unclear → ⚠️
+4. **Health**: Nutri-Score D/E → ⚠️ · ultra-processed (NOVA 4) and not otherwise healthy → ⚠️
+5. **Your day**: over your calorie goal or sugar limit → ⚠️
+
+Missing data gives "check the label" instead of a guess.
 
 ## Who owns what
 
 | Person | Files |
 |---|---|
-| **A: Scanner + API** | `src/lib/food.js`, `src/components/Scanner.jsx`, `src/components/ScanView.jsx` |
-| **B: Log + Dashboard** | `src/lib/log.js`, `src/components/Dashboard.jsx` |
-| **C: Shell + UI** | `src/App.jsx`, `src/components/ProductCard.jsx`, `src/styles.css` |
+| **A: Data + verdict** | `lib/food.js`, `lib/verdict.js`, `components/Scanner.jsx`, `ScanView.jsx`, `SwapSuggestion.jsx` |
+| **B: Storage + insights** | `lib/profile.js`, `lib/history.js`, `lib/log.js`, `lib/storage.js`, `components/ProfileView.jsx`, `HistoryView.jsx`, `Dashboard.jsx` |
+| **C: Screens + demo** | `App.jsx`, `components/VerdictCard.jsx`, `CompareView.jsx`, `Badges.jsx`, `styles.css`, pitch |
 
-## Shared data shapes (don't change without telling the team)
+## 60-second demo script
 
-```js
-// Food  (from lib/food.js)
-{ barcode, name, brand, image, servingGrams, per100g: { kcal, protein, carbs, fat } }
+1. **Profile**: tap 🥜 Peanuts. "I have a peanut allergy."
+2. **Scan a Mars bar** → red ⛔ **Don't eat**: "May contain traces of peanuts", Nutri-Score E, 15 sugar cubes.
+3. Scroll to **Healthier swaps** → tap **Compare** → 🏆 the swap wins.
+4. **Scan the Alpro yogurt** → ✅ **Go for it** → set the expiry to tomorrow → **I ate this**.
+5. **Today tab**: today's food grade A, "Don't eat" items avoided: 1.
+6. **History**: "Use these first" shows the yogurt expiring tomorrow.
 
-// Entry (from lib/log.js)
-{ id, date: "YYYY-MM-DD", time, barcode, name, image, grams, kcal, protein, carbs, fat }
-```
+Sample barcodes: Nutella `3017620422003` · Mars `5000159407236` · Coca-Cola `5449000000996` · Alpro yogurt `5411188119098`
 
-## Feature ideas
+## Ideas if you have time
 
-- Meal categories (breakfast/lunch/dinner/snack)
-- Manual food entry when a barcode isn't found
-- History view / weekly chart
-- Recently scanned list for quick re-adding
-- Sugar, fiber and sodium, plus Nutri-Score from Open Food Facts
+- Read the expiry date with the camera (OCR)
+- "Snap a meal" for food without barcodes (AI photo → nutrition)
+- Share a verdict card as an image
