@@ -1,4 +1,4 @@
-# Track-er: "Should I eat this?"
+# Zatt: "Should I eat this?"
 
 Scan any food barcode and get **one clear answer**: ✅ Go for it · ⚠️ In moderation · ⛔ Don't eat,
 personalised to your allergies, diet, daily goals and the product's expiry date. The app also suggests healthier swaps.
