@@ -71,7 +71,7 @@ export default function ScanView({ onFound, profileEmpty, onSetupProfile }) {
         <span className="search-icon">🔎</span>
         <input
           type="search"
-          placeholder="Search a food (e.g. coca cola, rice) or barcode"
+          placeholder="Search food or barcode (e.g. rice, coke)"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);

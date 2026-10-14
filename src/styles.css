@@ -1,6 +1,6 @@
 /* Owner: Person C — design tokens + styles. */
 :root {
-  --bg: #f4f6f3;
+  --bg: #f1f3f2;
   --surface: #ffffff;
   --text: #17201a;
   --muted: #6b766e;
@@ -11,8 +11,8 @@
   --protein: #3b82f6;
   --carbs: #f59e0b;
   --fat: #ec4899;
-  --radius: 16px;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.04);
+  --radius: 14px;
+  --shadow: 0 1px 3px rgb(16 24 20 / 0.06), 0 1px 2px rgb(16 24 20 / 0.04);
   color-scheme: light dark;
 }
 
@@ -302,3 +302,116 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .per100 { font-size: 0.85rem; color: var(--muted); background: var(--bg); padding: 8px 12px; border-radius: 10px; }
 .per100 b { color: var(--text); }
 .portion-title { font-weight: 600; font-size: 0.9rem; margin-bottom: -4px; }
+
+
+/* =========================================================
+   MyFitnessPal-style layout (keeps the green palette above)
+   ========================================================= */
+body { font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.app { padding: 0 16px 120px; }
+.card { border: 0; padding: 18px; }
+@media (prefers-color-scheme: dark) { .card { border: 1px solid var(--border); } }
+
+/* Header */
+.topbar { align-items: center; padding: 16px 0 4px; }
+.brand { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--accent); }
+.topbar-date {
+  font-size: 0.8rem; font-weight: 600; color: var(--muted);
+  background: var(--surface); padding: 6px 12px; border-radius: 999px; box-shadow: var(--shadow);
+}
+.page-title { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin: 10px 0 16px; }
+
+/* Card titles */
+.card-title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+.card-title h2, .meal-head h2, .totals-table h2 { font-size: 1.1rem; font-weight: 700; }
+.card-title .link { margin: 0; font-weight: 600; }
+
+/* Rings */
+.ring { position: relative; flex-shrink: 0; }
+.ring svg { display: block; }
+.ring-track { fill: none; stroke: var(--border); }
+.ring-fill {
+  fill: none; stroke: var(--accent); stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 50% 50%; transform-box: fill-box;
+  transition: stroke-dashoffset 0.6s ease;
+}
+.ring-fill.over { stroke: var(--danger); }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.ring-big { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.02em; }
+.ring-small { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+.ring-mid { font-size: 1rem; font-weight: 700; }
+.ring-tiny { font-size: 0.65rem; color: var(--muted); }
+
+/* Calories card */
+.calories { display: flex; align-items: center; gap: 24px; }
+.cal-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.cal-legend li { display: flex; align-items: center; gap: 12px; }
+.cal-legend li > span:last-child { display: flex; flex-direction: column; line-height: 1.2; }
+.cal-legend b { font-size: 1.05rem; }
+.legend-icon { width: 22px; height: 22px; color: var(--muted); flex-shrink: 0; display: inline-grid; place-items: center; }
+.legend-icon.food { color: var(--accent); }
+.legend-icon .grade-dot { width: 22px; height: 22px; font-size: 0.7rem; }
+
+/* Macro rings */
+.macro-rings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; text-align: center; }
+.macro-ring { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.macro-ring-label { font-size: 0.8rem; font-weight: 700; }
+.protein-goal { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.done-text { color: var(--accent); font-weight: 600; }
+
+/* Diary */
+.equation { text-align: center; }
+.equation-row { display: flex; justify-content: space-around; align-items: flex-start; margin-top: 8px; }
+.equation-row > span:not(.op) { display: flex; flex-direction: column; align-items: center; }
+.equation-row b { font-size: 1.3rem; font-weight: 800; }
+.equation-row small { font-size: 0.72rem; color: var(--muted); }
+.equation-row .op { font-size: 1.3rem; color: var(--muted); padding-top: 2px; }
+.remaining { color: var(--accent); }
+.meal { padding: 0; overflow: hidden; }
+.meal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.meal-kcal { font-weight: 700; font-size: 1.05rem; }
+.meal-items { list-style: none; margin: 0; padding: 0; }
+.meal-items li { display: flex; align-items: center; gap: 10px; padding: 12px 10px 12px 18px; border-bottom: 1px solid var(--border); }
+.add-food {
+  width: 100%; background: none; border: 0; text-align: left; cursor: pointer;
+  padding: 14px 18px; color: var(--accent); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em;
+}
+.add-food:hover { background: var(--accent-soft); }
+.totals-table table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.88rem; }
+.totals-table th { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-align: right; padding: 6px 4px; }
+.totals-table td { text-align: right; padding: 8px 4px; border-top: 1px solid var(--border); font-weight: 600; }
+.totals-table td:first-child { text-align: left; font-weight: 500; }
+.totals-table tr.muted td { color: var(--muted); font-weight: 500; }
+
+/* Meal picker */
+.segmented { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--bg); border-radius: 12px; padding: 4px; gap: 4px; }
+.segmented button { background: none; border: 0; border-radius: 9px; padding: 8px 2px; font-size: 0.82rem; font-weight: 600; color: var(--muted); cursor: pointer; }
+.segmented button.on { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
+
+/* Bottom navigation with raised center button */
+.tabbar {
+  display: grid; grid-template-columns: repeat(5, 1fr); align-items: end; gap: 0;
+  padding: 6px 8px calc(8px + env(safe-area-inset-bottom));
+  box-shadow: 0 -1px 8px rgb(0 0 0 / 0.06);
+}
+.tabbar button {
+  max-width: none; background: none; border-radius: 0; padding: 4px 0;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--muted);
+}
+.tabbar button.active { background: none; color: var(--accent); }
+.tab-icon { display: grid; place-items: center; }
+.tab-icon svg { width: 24px; height: 24px; }
+.tabbar button span.tab-label { font-size: 0.68rem; font-weight: 600; }
+.tabbar button span.tab-icon { font-size: inherit; }
+.tabbar button.fab { padding: 0; }
+.tabbar button.fab .tab-icon {
+  width: 56px; height: 56px; border-radius: 50%; margin-top: -26px;
+  background: var(--accent); color: #fff; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 45%, transparent);
+  border: 4px solid var(--surface); transition: transform 0.15s;
+}
+.tabbar button.fab:active .tab-icon { transform: scale(0.94); }
+.tabbar button.fab .tab-icon svg { width: 26px; height: 26px; }
+
+.sticky-actions { bottom: 78px; }
+.toast { bottom: 96px; }
+.tabbar { z-index: 5; }

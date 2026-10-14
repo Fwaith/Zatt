@@ -120,6 +120,15 @@ export function dayReasons(food, profile, today, grams) {
   } else {
     out.push(reason("go", `${n.kcal} kcal fits your day (${kcalLeft} left)`));
   }
+  if (n.protein >= 5 && profile.proteinGoal > 0) {
+    const pct = Math.round((n.protein / profile.proteinGoal) * 100);
+    const left = profile.proteinGoal - today.protein;
+    out.push(
+      left <= 0
+        ? reason("info", `${n.protein} g protein (you've already hit your ${profile.proteinGoal} g goal)`)
+        : reason(pct >= 15 ? "go" : "info", `${n.protein} g protein: ${pct}% of your ${profile.proteinGoal} g daily goal`)
+    );
+  }
   if (n.sugar >= 1 && n.sugar > sugarLeft) {
     out.push(reason("caution", `${n.sugar} g sugar goes over your ${profile.sugarLimit} g daily limit`));
   }

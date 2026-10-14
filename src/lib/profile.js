@@ -33,6 +33,7 @@ export const DEFAULT_PROFILE = {
   allergens: [],
   diets: [],
   goal: 2000, // kcal per day
+  proteinGoal: 120, // g per day
   sugarLimit: 30, // g per day (WHO guideline for added sugar)
 };
 

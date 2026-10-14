@@ -1,15 +1,17 @@
 // Owner: Person C — the "Should I eat this?" screen.
 import { useEffect, useState } from "react";
 import { nutritionFor } from "../lib/food.js";
+import { MEALS } from "../lib/log.js";
 import { getVerdict, LEVELS } from "../lib/verdict.js";
 import { NovaBadge, NutriScore, SugarCubes } from "./Badges.jsx";
 import SwapSuggestion from "./SwapSuggestion.jsx";
 
 export default function VerdictCard({
-  food, profile, today, expiry,
+  food, profile, today, expiry, defaultMeal,
   onExpiryChange, onLevelChange, onLog, onBack, onCompare, onOpen,
 }) {
   const [grams, setGrams] = useState(food.servingGrams);
+  const [meal, setMeal] = useState(defaultMeal);
   const amount = Number(grams) || 0;
   const verdict = getVerdict(food, profile, { today, grams: amount, expiry });
   const meta = LEVELS[verdict.level];
@@ -97,6 +99,23 @@ export default function VerdictCard({
         )}
       </div>
 
+      <div className="card stack-sm">
+        <p className="portion-title">Add to</p>
+        <div className="segmented" role="radiogroup" aria-label="Meal">
+          {MEALS.map((m) => (
+            <button
+              key={m.id}
+              role="radio"
+              aria-checked={meal === m.id}
+              className={meal === m.id ? "on" : ""}
+              onClick={() => setMeal(m.id)}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <SwapSuggestion food={food} profile={profile} onCompare={onCompare} onOpen={onOpen} />
 
       <div className="row sticky-actions">
@@ -104,9 +123,9 @@ export default function VerdictCard({
         <button
           className={`btn grow ${verdict.level === "stop" ? "danger" : ""}`}
           disabled={!(amount > 0)}
-          onClick={() => onLog(food, amount, verdict.level)}
+          onClick={() => onLog(food, amount, verdict.level, meal)}
         >
-          {verdict.level === "stop" ? "Eat it anyway" : "I ate this"}
+          {verdict.level === "stop" ? "Eat it anyway" : `Add to ${MEALS.find((m) => m.id === meal).label}`}
         </button>
       </div>
     </section>

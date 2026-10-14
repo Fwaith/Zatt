@@ -50,6 +50,14 @@ export default function ProfileView({ profile, onChange }) {
           />
         </label>
         <label className="field">
+          <span>Protein (g)</span>
+          <input
+            type="number" min="0" step="5" value={profile.proteinGoal}
+            onChange={(e) => set({ proteinGoal: Math.max(0, Number(e.target.value) || 0) })}
+          />
+          <span className="muted small">Tip: about 1.6 g per kg of body weight to build muscle.</span>
+        </label>
+        <label className="field">
           <span>Sugar limit (g)</span>
           <input
             type="number" min="0" step="5" value={profile.sugarLimit}

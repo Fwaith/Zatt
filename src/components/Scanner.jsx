@@ -27,8 +27,8 @@ export default function Scanner({ onDetected }) {
       .catch((err) => {
         setError(
           String(err).includes("NotAllowed")
-            ? "Camera permission denied. Type the barcode below instead."
-            : "Camera unavailable (needs HTTPS or localhost). Type the barcode below instead."
+            ? "Camera permission denied. Search or type a barcode above instead."
+            : "Camera unavailable (needs HTTPS or localhost). Search or type a barcode above instead."
         );
       });
 

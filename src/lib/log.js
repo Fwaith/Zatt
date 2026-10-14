@@ -1,7 +1,7 @@
 // Owner: Person B — food log + daily/weekly stats, stored in localStorage.
 //
 // Entry shape:
-// { id, date: "YYYY-MM-DD", time, barcode, name, image, grams,
+// { id, date: "YYYY-MM-DD", time, meal, barcode, name, image, emoji, grams,
 //   kcal, protein, carbs, fat, sugar, nutriscore, level }
 
 import { GRADE_RANK, nutritionFor } from "./food.js";
@@ -14,14 +14,34 @@ export function todayKey(d = new Date()) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+export const MEALS = [
+  { id: "breakfast", label: "Breakfast" },
+  { id: "lunch", label: "Lunch" },
+  { id: "dinner", label: "Dinner" },
+  { id: "snacks", label: "Snacks" },
+];
+
+/** Best-guess meal for a time of day. */
+export function mealForTime(d = new Date()) {
+  const h = d.getHours();
+  if (h >= 4 && h < 11) return "breakfast";
+  if (h >= 11 && h < 15) return "lunch";
+  if (h >= 17 && h < 22) return "dinner";
+  return "snacks";
+}
+
+/** Older entries were saved without a meal, so fall back to the time they were logged. */
+export const mealOf = (entry) => entry.meal || mealForTime(new Date(entry.time));
+
 export const loadEntries = () => read(ENTRIES_KEY, []);
 export const saveEntries = (entries) => write(ENTRIES_KEY, entries);
 
-export function makeEntry(food, grams, level) {
+export function makeEntry(food, grams, level, meal = mealForTime()) {
   return {
     id: crypto.randomUUID?.() ?? String(Date.now() + Math.random()),
     date: todayKey(),
     time: new Date().toISOString(),
+    meal,
     barcode: food.barcode,
     name: food.name,
     image: food.image,
@@ -51,12 +71,13 @@ export function totals(entries) {
   return Object.fromEntries(Object.entries(t).map(([k, v]) => [k, Math.round(v)]));
 }
 
-/** Simple macro targets from a calorie goal (25% protein / 50% carbs / 25% fat). */
-export function macroTargets(goal) {
+/** Macro targets: the user's protein goal, with the remaining calories split 60% carbs / 40% fat. */
+export function macroTargets(goal, proteinGoal) {
+  const rest = Math.max(goal - proteinGoal * 4, 0);
   return {
-    protein: Math.round((goal * 0.25) / 4),
-    carbs: Math.round((goal * 0.5) / 4),
-    fat: Math.round((goal * 0.25) / 9),
+    protein: proteinGoal,
+    carbs: Math.round((rest * 0.6) / 4),
+    fat: Math.round((rest * 0.4) / 9),
   };
 }
 
