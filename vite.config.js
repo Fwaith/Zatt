@@ -12,7 +12,7 @@ const offSearchProxy = {
 };
 
 export default defineConfig({
-  base: "/Track-er/",   // ← replace with your exact repo name
+  base: "/Zatt/",   // ← replace with your exact repo name
   plugins: [react()],
   server: { proxy: offSearchProxy },
   preview: { proxy: offSearchProxy },
